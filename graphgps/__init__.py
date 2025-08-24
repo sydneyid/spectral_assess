@@ -19,8 +19,8 @@ from graphgps.layer.mp_init import mp_init_weight
 
 # Patch nn.Linear to use MP init
 _orig_linear_init = nn.Linear.__init__
-def mp_linear_init(self, in_features, out_features, bias=True):
-	_orig_linear_init(self, in_features, out_features, bias)
+def mp_linear_init(self, in_features, out_features, bias=True, *args, **kwargs):
+	_orig_linear_init(self, in_features, out_features, bias, *args, **kwargs)
 	mp_init_weight(self.weight)
 	if self.bias is not None:
 		nn.init.zeros_(self.bias)

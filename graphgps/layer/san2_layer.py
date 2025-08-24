@@ -69,8 +69,8 @@ class MultiHeadAttention2Layer(nn.Module):
             mp_init_weight(self.E_2.weight)
             self.fake_edge_emb = fake_edge_emb
 
-    self.V = nn.Linear(in_dim, out_dim * num_heads, bias=use_bias)
-    mp_init_weight(self.V.weight)
+        self.V = nn.Linear(in_dim, out_dim * num_heads, bias=use_bias)
+        mp_init_weight(self.V.weight)
 
     def propagate_attention(self, batch):
         src = batch.K_h[batch.edge_index[0]]  # (num real edges) x num_heads x out_dim
