@@ -52,6 +52,10 @@ class GPSLayer(nn.Module):
         elif local_gnn_type == "GCN":
             self.local_gnn_with_edge_attr = False
             self.local_model = pygnn.GCNConv(dim_h, dim_h)
+            # MP init for GCNConv
+            mp_init_weight(self.local_model.lin.weight)
+
+
         elif local_gnn_type == 'GIN':
             self.local_gnn_with_edge_attr = False
             gin_nn = nn.Sequential(Linear_pyg(dim_h, dim_h),
@@ -62,6 +66,8 @@ class GPSLayer(nn.Module):
         # MPNNs supporting also edge attributes.
         elif local_gnn_type == 'GENConv':
             self.local_model = pygnn.GENConv(dim_h, dim_h)
+         ## MP init for GENConv
+            mp_init_weight(self.local_model.lin.weight)
         elif local_gnn_type == 'GINE':
             gin_nn = nn.Sequential(Linear_pyg(dim_h, dim_h),
                                    self.activation(),
@@ -70,11 +76,24 @@ class GPSLayer(nn.Module):
                 self.local_model = GINEConvESLapPE(gin_nn)
             else:
                 self.local_model = pygnn.GINEConv(gin_nn)
+
+            # MP init for GINEConv
+            for m in gin_nn:
+                if isinstance(m, nn.Linear):
+                    mp_init_weight(m.weight)
+
+
         elif local_gnn_type == 'GAT':
             self.local_model = pygnn.GATConv(in_channels=dim_h,
                                              out_channels=dim_h // num_heads,
                                              heads=num_heads,
                                              edge_dim=dim_h)
+            
+            # MP init for GATConv
+            mp_init_weight(self.local_model.lin_src.weight)
+            mp_init_weight(self.local_model.lin_dst.weight)
+
+
         elif local_gnn_type == 'PNA':
             # Defaults from the paper.
             # aggregators = ['mean', 'min', 'max', 'std']
@@ -91,12 +110,23 @@ class GPSLayer(nn.Module):
                                              pre_layers=1,
                                              post_layers=1,
                                              divide_input=False)
+            # MP init for PNAConv
+            for lin in self.local_model.post_nn:
+                if isinstance(lin, nn.Linear):
+                    mp_init_weight(lin.weight)
+
         elif local_gnn_type == 'CustomGatedGCN':
             self.local_model = GatedGCNLayer(dim_h, dim_h,
                                              dropout=dropout,
                                              residual=True,
                                              act=act,
                                              equivstable_pe=equivstable_pe)
+            
+            # MP init for CustomGatedGCN (if it has linear layers)
+            for m in self.local_model.modules():
+                if isinstance(m, nn.Linear):
+                    mp_init_weight(m.weight)
+
         else:
             raise ValueError(f"Unsupported local GNN model: {local_gnn_type}")
         self.local_gnn_type = local_gnn_type
@@ -105,6 +135,7 @@ class GPSLayer(nn.Module):
         if global_model_type == 'None':
             self.self_attn = None
         elif global_model_type in ['Transformer', 'BiasedTransformer']:
+            print('its using the multi head attention transformer model ')
             self.self_attn = torch.nn.MultiheadAttention(
                 dim_h, num_heads, dropout=self.attn_dropout, batch_first=True)
             # MP init for MultiheadAttention weights
