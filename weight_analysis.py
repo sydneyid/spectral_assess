@@ -2,6 +2,7 @@ import datetime
 import os
 import torch
 import logging
+import weightwatcher as ww
 
 import graphgps  # noqa, register custom modules
 from graphgps.agg_runs import agg_runs
@@ -146,43 +147,18 @@ if __name__ == '__main__':
             print('\n\n\n it came from a pretrained directory check here !!!!!!!!!!!!')
             model = init_model_from_pretrained(model, cfg.pretrained.dir, cfg.pretrained.freeze_main,
                 cfg.pretrained.reset_prediction_head, seed=cfg.seed)
-            
+        print(' finished creating the model ')
         # Load the checkpoint
-        ckpt_path = "/Users/sydneydolan/Documents/Graph_Analysis_LOG/Spectral:RMT/checkpoints/0.ckpt"
+        ckpt_path = "/Users/sydneydolan/Documents/Graph_Analysis_LOG/Spectral:RMT/checkpoints/GPS_cifar_37.ckpt"
         ckpt = torch.load(ckpt_path, map_location='cpu')
 
         state_dict = ckpt['model_state']
         # Load the weights into the model
         model.load_state_dict(state_dict, strict=False)  # strict=False allows partial loading
-
-        # After model = create_model() and before/after training
-        print("Model parameter shapes:")
-        for name, param in model.named_parameters():
-            print(f"{name}: {param.shape}")
-        optimizer = create_optimizer(model.parameters(),
-                                     new_optimizer_config(cfg))
-        scheduler = create_scheduler(optimizer, new_scheduler_config(cfg))
-        # Print model info
-        logging.info(model)
-        logging.info(cfg)
-        cfg.params = params_count(model)
-        logging.info('Num parameters: %s', cfg.params)
-        # Start training
-        if cfg.train.mode == 'standard':
-            if cfg.wandb.use:
-                logging.warning("[W] WandB logging is not supported with the "
-                                "default train.mode, set it to `custom`")
-            datamodule = GraphGymDataModule()
-            train(model, datamodule, logger=True)
-        else:
-            train_dict[cfg.train.mode](loggers, loaders, model, optimizer,
-                                       scheduler)
-    # Aggregate results from different seeds
-    try:
-        agg_runs(cfg.out_dir, cfg.metric_best)
-    except Exception as e:
-        logging.info(f"Failed when trying to aggregate multiple runs: {e}")
-    # When being launched in batch mode, mark a yaml as done
-    if args.mark_done:
-        os.rename(args.cfg_file, f'{args.cfg_file}_done')
-    logging.info(f"[*] All done: {datetime.datetime.now()}")
+        print('loaded the state dictionary in the new weights ')
+        # --- Analyze with WeightWatcher ---
+        ww_model = ww.WeightWatcher(model=model, framework="pytorch")
+        details = ww_model.analyze(plot=True, mp_fit=True)
+        print('weightwatcher details ')
+        print(details)
+        break
