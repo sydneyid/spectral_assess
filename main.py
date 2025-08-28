@@ -143,22 +143,10 @@ if __name__ == '__main__':
         loggers = create_logger()
         model = create_model()
         if cfg.pretrained.dir:
-            print('\n\n\n it came from a pretrained directory check here !!!!!!!!!!!!')
-            model = init_model_from_pretrained(model, cfg.pretrained.dir, cfg.pretrained.freeze_main,
-                cfg.pretrained.reset_prediction_head, seed=cfg.seed)
-            
-        # Load the checkpoint
-        ckpt_path = "/Users/sydneydolan/Documents/Graph_Analysis_LOG/Spectral:RMT/checkpoints/0.ckpt"
-        ckpt = torch.load(ckpt_path, map_location='cpu')
-
-        state_dict = ckpt['model_state']
-        # Load the weights into the model
-        model.load_state_dict(state_dict, strict=False)  # strict=False allows partial loading
-
-        # After model = create_model() and before/after training
-        print("Model parameter shapes:")
-        for name, param in model.named_parameters():
-            print(f"{name}: {param.shape}")
+            model = init_model_from_pretrained(
+                model, cfg.pretrained.dir, cfg.pretrained.freeze_main,
+                cfg.pretrained.reset_prediction_head, seed=cfg.seed
+            )
         optimizer = create_optimizer(model.parameters(),
                                      new_optimizer_config(cfg))
         scheduler = create_scheduler(optimizer, new_scheduler_config(cfg))
