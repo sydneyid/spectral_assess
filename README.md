@@ -108,12 +108,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Uses [WeightWatcher](https://github.com/CalculatedContent/WeightWatcher) for quality analysis
 - Inspired by Random Matrix Theory applications in deep learning
 
-## Contact
 
-For questions or issues, please:
-- Open an issue on GitHub
-- Contact: sydney.dolan@[institution].edu
-
----
-
-*Last updated: October 2025*
