@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Aug 29 17:35:40 2025
-
-@author: sydneydolan
-"""
-
 import matplotlib.pyplot as plt
 
 layers_cifar =[1,2,3]
