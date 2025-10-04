@@ -118,6 +118,7 @@ if __name__ == '__main__':
     # Load cmd line args
     args = parse_args()
     # Load config file
+    args.cfg_file = 'configs/GPS/cifar10-GPS.yaml'
     set_cfg(cfg)
     load_cfg(cfg, args)
     custom_set_out_dir(cfg, args.cfg_file, cfg.name_tag)
@@ -144,12 +145,11 @@ if __name__ == '__main__':
         loggers = create_logger()
         model = create_model()
         if cfg.pretrained.dir:
-            print('\n\n\n it came from a pretrained directory check here !!!!!!!!!!!!')
             model = init_model_from_pretrained(model, cfg.pretrained.dir, cfg.pretrained.freeze_main,
                 cfg.pretrained.reset_prediction_head, seed=cfg.seed)
         print(' finished creating the model ')
         # Load the checkpoint
-        ckpt_path = "/Users/sydneydolan/Documents/Graph_Analysis_LOG/Spectral:RMT/checkpoints/GPS_cifar_37.ckpt"
+        ckpt_path = "checkpoints/GPS_cifar_37.ckpt"
         ckpt = torch.load(ckpt_path, map_location='cpu')
 
         state_dict = ckpt['model_state']
@@ -158,7 +158,10 @@ if __name__ == '__main__':
         print('loaded the state dictionary in the new weights ')
         # --- Analyze with WeightWatcher ---
         ww_model = ww.WeightWatcher(model=model, framework="pytorch")
-        details = ww_model.analyze(plot=True, mp_fit=True)
-        print('weightwatcher details ')
-        print(details)
+        details = ww_model.analyze(plot=False, mp_fit=True)
+
+        results_df = ww_model.analyze(plot=False, mp_fit=True)
+        results_df.to_csv("attention_weightwatcher.csv", index=False)
+
+
         break
