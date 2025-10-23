@@ -108,4 +108,17 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Uses [WeightWatcher](https://github.com/CalculatedContent/WeightWatcher) for quality analysis
 - Inspired by Random Matrix Theory applications in deep learning
 
+## Citation
+
+If our work was helpful, we'd appreciate the following citation:
+
+```
+@article{Dolan2025,
+    author    = {Dolan, Sydney and Z. Li, Max},
+    month     = {Dec},
+    year      = {2025},
+    title     = {Detecting Learning Dynamics in Graph Transformers via Spectral Deviations},
+    journal       = {Learning on Graphs}
+}
+```
 
